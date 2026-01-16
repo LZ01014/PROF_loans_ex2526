@@ -19,38 +19,45 @@ public class LoanApprovalService {
             int amountRequested,
             int termMonths
     ) {
+        // [1] Entrada al método
         validate(applicant, amountRequested, termMonths);
 
+        // [2] Inicialización de variables
         int score = applicant.creditScore();
         boolean hasDefaults = applicant.hasRecentDefaults();
         int income = applicant.monthlyIncome();
 
+        // [3] Declaración de variable de salida
         Decision decision;
 
-        if (score < 500) {
-            decision = Decision.REJECTED;
-        } else if (score < 650) {
-            if (income >= 2500 && !hasDefaults) {
-                decision = Decision.MANUAL_REVIEW;
+        // [4] Decisión principal por score
+        if (score < 500) { // [4a] Score bajo
+            decision = Decision.REJECTED; // [5] Rechazo directo
+        } else if (score < 650) { // [4b] Score medio
+            // [6] Decisión por ingresos y impagos
+            if (income >= 2500 && !hasDefaults) { // [6a] Ingresos altos y sin impagos
+                decision = Decision.MANUAL_REVIEW; // [7] Revisión manual
             } else {
-                decision = Decision.REJECTED;
+                decision = Decision.REJECTED; // [8] Rechazo
             }
-        } else {
-            if (amountRequested <= income * 8) {
-                decision = Decision.APPROVED;
+        } else { // [4c] Score alto
+            // [9] Decisión por relación amount/income
+            if (amountRequested <= income * 8) { // [9a] Cantidad razonable
+                decision = Decision.APPROVED; // [10] Aprobación directa
             } else {
-                decision = Decision.MANUAL_REVIEW;
+                decision = Decision.MANUAL_REVIEW; // [11] Revisión manual
             }
         }
 
+        // [12] Regla VIP para elevar MANUAL_REVIEW a APPROVED
         if (decision == Decision.MANUAL_REVIEW
                 && applicant.isVip()
                 && score >= 600
                 && !hasDefaults) {
-            decision = Decision.APPROVED;
+            decision = Decision.APPROVED; // [13] Elevación a aprobado
         }
 
-        return decision;
+        return decision; // [14] Salida del método
     }
 
     private void validate(Applicant applicant, int amountRequested, int termMonths) {
